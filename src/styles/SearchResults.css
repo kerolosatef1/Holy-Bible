@@ -1,0 +1,134 @@
+.search-results__header {
+  background: linear-gradient(135deg, var(--border-ornate), #5c3a21);
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 8px;
+  margin-bottom: 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.search-results__count {
+  font-size: 0.95rem;
+}
+
+.search-results__clear-btn {
+  background: rgba(255,255,255,0.2);
+  border: none;
+  padding: 8px 14px;
+  border-radius: 5px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.3s;
+}
+
+.search-results__clear-btn:hover {
+  background: rgba(255,255,255,0.3);
+}
+
+.search-results__list {
+  max-height: 450px;
+  overflow-y: auto;
+  padding-left: 5px;
+}
+
+.search-results__item {
+  background: rgba(139, 69, 19, 0.1);
+  border-right: 4px solid var(--border-ornate);
+  padding: 12px 18px;
+  margin-bottom: 12px;
+  border-radius: 0 8px 8px 0;
+  cursor: pointer;
+  transition: all 0.3s;
+  animation: slideInUp 0.3s ease;
+}
+
+.search-results__item:hover {
+  background: rgba(139, 69, 19, 0.2);
+  transform: translateX(-5px);
+}
+
+.search-results__reference {
+  font-weight: bold;
+  color: var(--accent-red);
+  margin-bottom: 6px;
+  font-size: 0.95rem;
+}
+
+.search-results__text {
+  font-family: 'Amiri', serif;
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: var(--text-color);
+}
+
+.search-results__more {
+  text-align: center;
+  color: #666;
+  padding: 15px;
+  font-size: 0.9rem;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 50px 20px;
+  color: #666;
+}
+
+.empty-state__icon {
+  font-size: 3.5rem;
+  margin-bottom: 15px;
+}
+
+.empty-state__title {
+  font-size: 1.2rem;
+  margin-bottom: 8px;
+  color: var(--text-color);
+}
+
+.empty-state__text {
+  font-size: 0.95rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .search-results__header {
+    padding: 10px 15px;
+  }
+
+  .search-results__list {
+    max-height: 380px;
+  }
+
+  .search-results__item {
+    padding: 10px 15px;
+  }
+
+  .search-results__text {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .search-results__header {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .search-results__list {
+    max-height: 320px;
+  }
+
+  .empty-state {
+    padding: 30px 15px;
+  }
+
+  .empty-state__icon {
+    font-size: 3rem;
+  }
+}
