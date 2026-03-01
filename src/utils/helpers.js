@@ -1,22 +1,35 @@
 import { bookAbbreviations } from '../data/constants';
 
+// Convert Arabic numerals to English
+const arabicToEnglish = (str) => {
+  const arabicNums = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+  return str.replace(/[٠-٩]/g, (d) => arabicNums.indexOf(d));
+};
+
 // Remove Arabic diacritics (tashkeel)
 export const removeTashkeel = (text) => {
   return text.replace(/[\u064B-\u065F\u0670\u06D6-\u06DC\u06DF-\u06E4\u06E7\u06E8\u06EA-\u06ED]/g, '');
 };
 
-// Parse reference like "يو3:16"
+// Parse reference like "يو3:16" or "يو٣:١٦" (supports Arabic & English numbers)
 export const parseReference = (query, books) => {
-  const refPattern = /^([^\d]+)(\d+)(?::(\d+))?$/;
-  const match = query.trim().match(refPattern);
+  // Convert Arabic numbers to English first
+  const normalizedQuery = arabicToEnglish(query.trim());
+  
+  // Pattern: BookName + Chapter + optional(:Verse)
+  // Supports: يو3:16, يو 3:16, يو3 16, يو 3 16, يو3-16, يو٣:١٦
+  const refPattern = /^([^\d٠-٩]+)\s*(\d+)\s*[:\-\s]?\s*(\d+)?$/;
+  const match = normalizedQuery.match(refPattern);
   
   if (match) {
     const abbr = match[1].trim();
     const chapter = parseInt(match[2]);
     const verse = match[3] ? parseInt(match[3]) : null;
     
+    // Find full book name
     let bookName = bookAbbreviations[abbr];
     if (!bookName) {
+      // Try to find partial match
       bookName = books.find(b => b.includes(abbr) || b.startsWith(abbr));
     }
     
@@ -35,6 +48,9 @@ export const highlightText = (text, query) => {
   let result = text;
   
   terms.forEach(term => {
+    // Skip if term looks like a number (part of reference)
+    if (/^\d+$/.test(term)) return;
+    
     const termChars = term.split('');
     const tashkeelPattern = '[\u064B-\u065F\u0670\u06D6-\u06DC\u06DF-\u06E4\u06E7\u06E8\u06EA-\u06ED]*';
     const pattern = termChars.join(tashkeelPattern);

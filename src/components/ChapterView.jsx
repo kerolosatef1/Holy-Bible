@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import '../styles/BookViewer.css';
 
 const ChapterView = ({ 
@@ -12,6 +12,20 @@ const ChapterView = ({
   onNext,
   isFlipping
 }) => {
+  const highlightedRef = useRef(null);
+
+  // Scroll to highlighted verse when it changes
+  useEffect(() => {
+    if (highlightedVerse && highlightedRef.current) {
+      setTimeout(() => {
+        highlightedRef.current.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center' 
+        });
+      }, 300);
+    }
+  }, [highlightedVerse, currentChapter, currentBook]);
+
   return (
     <div className={`book-viewer__page ${isFlipping ? 'page-flip' : ''}`}>
       <div className="chapter-header">
@@ -23,6 +37,7 @@ const ChapterView = ({
         {verses.map(v => (
           <span
             key={v.verse}
+            ref={highlightedVerse === v.verse ? highlightedRef : null}
             className={`verse ${highlightedVerse === v.verse ? 'verse--highlighted' : ''}`}
           >
             <span className="verse__number">{v.verse}</span>
