@@ -1,4 +1,55 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Vazirmatn:wght@100..900&display=swap');
+/* Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@400;500;700&display=swap');
+
+/* Calibri Font Family */
+@font-face {
+  font-family: 'Calibri';
+  src: url('../fonts/calibri.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Calibri';
+  src: url('../fonts/calibri-bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Calibri';
+  src: url('../fonts/calibri-italic.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Calibri';
+  src: url('../fonts/calibri-bold-italic.ttf') format('truetype');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Calibri';
+  src: url('../fonts/calibri-light.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Calibri';
+  src: url('../fonts/calibri-light-italic.ttf') format('truetype');
+  font-weight: 300;
+  font-style: italic;
+  font-display: swap;
+}
+
 :root {
   --page-bg: #f8f4e8;
   --page-bg-dark: #e8e0cc;
@@ -23,10 +74,12 @@ html {
 }
 
 body {
+  font-family: 'Calibri', 'Tajawal', sans-serif;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%);
+  min-height: 100vh;
+  direction: rtl;
   width: 100%;
-  min-width: 0;
   overflow-x: hidden;
-  
 }
 
 #root {
@@ -39,16 +92,6 @@ body {
   width: 100%;
   min-width: 0;
   overflow-x: hidden;
-}
-
-body {
-    font-family: "DM Sans", sans-serif;
-  font-optical-sizing: auto;
-  font-weight:600;
-  font-style: normal;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%);
-  min-height: 100vh;
-  direction: rtl;
 }
 
 /* Scrollbar */
