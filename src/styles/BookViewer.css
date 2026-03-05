@@ -97,6 +97,7 @@
   font-size: 1.3rem;
   color: var(--text-color);
   display: inline;
+  position: relative;
 }
 
 .verse__number {
@@ -108,26 +109,48 @@
   margin-right: 6px;
 }
 
+/* Highlighted verse - using box-shadow and outline instead of background */
+/* This way the highlight won't be copied to clipboard */
 .verse--highlighted {
-  background: linear-gradient(135deg, rgba(255, 215, 0, 0.5), rgba(255, 179, 71, 0.5));
-  padding: 8px 12px;
+  position: relative;
   border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(255, 179, 71, 0.4);
-  display: inline;
+  box-shadow: 
+    inset 0 0 0 1000px rgba(255, 215, 0, 0.35),
+    0 0 15px rgba(255, 179, 71, 0.5);
+  outline: 3px solid rgba(255, 179, 71, 0.6);
+  outline-offset: 2px;
+  padding: 8px 12px;
   animation: pulseHighlight 2s ease-in-out;
 }
 
-@keyframes pulseHighlight {
-  0% { box-shadow: 0 0 0 0 rgba(255, 179, 71, 0.7); }
-  50% { box-shadow: 0 0 20px 5px rgba(255, 179, 71, 0.4); }
-  100% { box-shadow: 0 2px 10px rgba(255, 179, 71, 0.4); }
+/* Alternative: Use pseudo-element for highlight (won't be copied) */
+.verse--highlighted::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  right: -6px;
+  bottom: -4px;
+  left: -6px;
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.4), rgba(255, 179, 71, 0.4));
+  border-radius: 8px;
+  z-index: -1;
+  pointer-events: none;
 }
 
+@keyframes pulseHighlight {
+  0% { box-shadow: inset 0 0 0 1000px rgba(255, 215, 0, 0.35), 0 0 0 0 rgba(255, 179, 71, 0.7); }
+  50% { box-shadow: inset 0 0 0 1000px rgba(255, 215, 0, 0.35), 0 0 25px 8px rgba(255, 179, 71, 0.4); }
+  100% { box-shadow: inset 0 0 0 1000px rgba(255, 215, 0, 0.35), 0 0 15px rgba(255, 179, 71, 0.5); }
+}
+
+/* Search highlight in text - using outline instead of background */
 .verse__highlight {
-  background: linear-gradient(135deg, #ffd700, #ffb347);
-  padding: 2px 5px;
-  border-radius: 3px;
+  position: relative;
   color: #000;
+  font-weight: 600;
+  border-radius: 3px;
+  box-shadow: inset 0 0 0 1000px rgba(255, 215, 0, 0.5);
+  padding: 2px 5px;
 }
 
 /* Navigation */

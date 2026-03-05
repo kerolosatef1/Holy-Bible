@@ -1,4 +1,4 @@
-import { bookAbbreviations } from '../data/constants';
+import { bookAbbreviations, numberedAbbreviations } from '../data/constants';
 
 // Convert Arabic numerals to English
 const arabicToEnglish = (str) => {
@@ -11,32 +11,123 @@ export const removeTashkeel = (text) => {
   return text.replace(/[\u064B-\u065F\u0670\u06D6-\u06DC\u06DF-\u06E4\u06E7\u06E8\u06EA-\u06ED]/g, '');
 };
 
-// Parse reference like "يو3:16" or "يو٣:١٦" (supports Arabic & English numbers)
-export const parseReference = (query, books) => {
-  // Convert Arabic numbers to English first
-  const normalizedQuery = arabicToEnglish(query.trim());
+// Find book from abbreviation
+const findBookFromAbbr = (abbr, books) => {
+  const cleanAbbr = removeTashkeel(abbr);
   
-  // Pattern: BookName + Chapter + optional(:Verse)
-  // Supports: يو3:16, يو 3:16, يو3 16, يو 3 16, يو3-16, يو٣:١٦
-  const refPattern = /^([^\d٠-٩]+)\s*(\d+)\s*[:\-\s]?\s*(\d+)?$/;
-  const match = normalizedQuery.match(refPattern);
-  
-  if (match) {
-    const abbr = match[1].trim();
-    const chapter = parseInt(match[2]);
-    const verse = match[3] ? parseInt(match[3]) : null;
-    
-    // Find full book name
-    let bookName = bookAbbreviations[abbr];
-    if (!bookName) {
-      // Try to find partial match
-      bookName = books.find(b => b.includes(abbr) || b.startsWith(abbr));
-    }
-    
-    if (bookName) {
-      return { book: bookName, chapter, verse };
+  // ابحث في الاختصارات
+  for (const [key, value] of Object.entries(bookAbbreviations)) {
+    const cleanKey = removeTashkeel(key);
+    if (cleanKey === cleanAbbr) {
+      // وجدنا الاختصار، دور على السفر في الداتا
+      const foundBook = books.find(b => {
+        const cleanB = removeTashkeel(b);
+        const cleanValue = removeTashkeel(value);
+        return cleanB === cleanValue || 
+               cleanB.includes(cleanValue) || 
+               cleanValue.includes(cleanB);
+      });
+      return foundBook || null;
     }
   }
+  return null;
+};
+
+// Parse reference like "يو3:16" or "كو1 5:3"
+export const parseReference = (query, books) => {
+  // Normalize query
+  let q = arabicToEnglish(query.trim());
+  q = removeTashkeel(q);
+  
+  // أولاً: جرب الاختصارات اللي فيها أرقام (الأطول أولاً)
+  // رتبهم من الأطول للأقصر
+  const sortedNumberedAbbrs = [...numberedAbbreviations].sort((a, b) => b.length - a.length);
+  
+  for (const abbr of sortedNumberedAbbrs) {
+    const cleanAbbr = removeTashkeel(abbr);
+    
+    // تأكد إن الـ query بيبدأ بالاختصار ده
+    if (q.startsWith(cleanAbbr)) {
+      const rest = q.slice(cleanAbbr.length).trim();
+      
+      // الباقي لازم يكون رقم الإصحاح و/أو الآية
+      // Patterns: "5:3" or "5 3" or "5-3" or "5"
+      const withVerseMatch = rest.match(/^(\d+)\s*[:\-\s]\s*(\d+)$/);
+      const chapterOnlyMatch = rest.match(/^(\d+)$/);
+      
+      if (withVerseMatch || chapterOnlyMatch) {
+        const book = findBookFromAbbr(abbr, books);
+        if (book) {
+          if (withVerseMatch) {
+            return {
+              book: book,
+              chapter: parseInt(withVerseMatch[1]),
+              verse: parseInt(withVerseMatch[2])
+            };
+          } else {
+            return {
+              book: book,
+              chapter: parseInt(chapterOnlyMatch[1]),
+              verse: null
+            };
+          }
+        }
+      }
+    }
+  }
+  
+  // ثانياً: جرب الاختصارات العادية
+  // Pattern: letters + space/nothing + numbers
+  const regularMatch = q.match(/^([^\d]+?)\s*(\d+)\s*[:\-\s]?\s*(\d+)?$/);
+  
+  if (regularMatch) {
+    const abbr = regularMatch[1].trim();
+    const chapter = parseInt(regularMatch[2]);
+    const verse = regularMatch[3] ? parseInt(regularMatch[3]) : null;
+    
+    // تأكد إنه مش اختصار فيه رقم
+    const isNumberedAbbr = sortedNumberedAbbrs.some(na => {
+      const cleanNA = removeTashkeel(na);
+      return cleanNA === abbr || abbr.startsWith(cleanNA);
+    });
+    
+    if (!isNumberedAbbr) {
+      const book = findBookFromAbbr(abbr, books);
+      if (book) {
+        return { book, chapter, verse };
+      }
+      
+      // جرب البحث بالاسم الكامل
+      const foundBook = books.find(b => {
+        const cleanB = removeTashkeel(b).toLowerCase();
+        const cleanAbbr = abbr.toLowerCase();
+        return cleanB.startsWith(cleanAbbr) || cleanB.includes(cleanAbbr);
+      });
+      
+      if (foundBook) {
+        return { book: foundBook, chapter, verse };
+      }
+    }
+  }
+  
+  // ثالثاً: جرب الاسم الكامل مع مسافات
+  const fullNameMatch = q.match(/^(.+?)\s+(\d+)\s*[:\-\s]?\s*(\d+)?$/);
+  
+  if (fullNameMatch) {
+    const bookName = fullNameMatch[1].trim().toLowerCase();
+    const chapter = parseInt(fullNameMatch[2]);
+    const verse = fullNameMatch[3] ? parseInt(fullNameMatch[3]) : null;
+    
+    const foundBook = books.find(b => {
+      const cleanB = removeTashkeel(b).toLowerCase();
+      return cleanB === bookName || cleanB.includes(bookName) || bookName.includes(cleanB);
+    });
+    
+    if (foundBook) {
+      return { book: foundBook, chapter, verse };
+    }
+  }
+  
   return null;
 };
 
@@ -48,7 +139,7 @@ export const highlightText = (text, query) => {
   let result = text;
   
   terms.forEach(term => {
-    // Skip if term looks like a number (part of reference)
+    // Skip numbers
     if (/^\d+$/.test(term)) return;
     
     const termChars = term.split('');
